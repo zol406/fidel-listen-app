@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Set up the Java environment
-    - name: Set up JDK 11
+    # Step 1: Set up the CORRECT Java environment (Java 17)
+    - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '17'
 
     # Step 2: Set up the Flutter SDK
     - name: Set up Flutter
@@ -21,33 +21,35 @@ jobs:
       with:
         channel: 'stable'
 
-    # Step 3: THE NEW FIX! Create a blank, valid project first.
-    - name: Create a new Flutter project
-      run: flutter create --project-name fidel_listen_final .
-
-    # Step 4: Get your code from the repository and place it into the project
-    - name: Checkout code
+    # Step 3: Get all of our source code
+    - name: Checkout source code
       uses: actions/checkout@v4
-
-    # Step 5: Get all the app's dependencies
-    - name: Get Flutter dependencies
-      run: flutter pub get
       
-# Step 5.5: Automatically create missing Android/iOS files
-    - name: Create platform-specific files
-      run: flutter create .
-      
-    # Step 6: Run the build_runner
-    - name: Run build_runner
-      run: flutter pub run build_runner build --delete-conflicting-outputs
+    # Step 4: Create a new, clean temporary directory for the build
+    - name: Create temporary build directory
+      run: mkdir ../build_dir
 
-    # Step 7: Build the actual .apk file
-    - name: Build APK
-      run: flutter build apk --release
+    # Step 5: Create a blank, valid project in the temporary directory
+    - name: Create a new Flutter project
+      run: |
+        cd ../build_dir
+        flutter create --project-name fidel_listen_final .
 
-    # Step 8: Upload the finished .apk file
+    # Step 6: Copy our app's source code into the blank project
+    - name: Copy app source into new project
+      run: cp -r app_source/* ../build_dir/
+
+    # Step 7: Navigate into the new project and build
+    - name: Build the App
+      run: |
+        cd ../build_dir
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs
+        flutter build apk --release
+        
+    # Step 8: Upload the finished .apk file from the build directory
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: fidel-listen-app-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: ../build_dir/build/app/outputs/flutter-apk/app-release.apk
