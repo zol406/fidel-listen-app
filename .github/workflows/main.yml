@@ -25,13 +25,13 @@ jobs:
       with:
         channel: 'stable'
     
-    # Step 4: Manually create the Android build file to fix NDK and v1 embedding issues
+    # Step 4: Manually create the Android build files
     - name: Create required Android build files
       run: |
-        mkdir -p android/app
-        # This fixes the NDK version error
+        # Create all necessary parent directories first
+        mkdir -p android/app/src/main 
+        # Now create the files inside those directories
         echo 'android { ndkVersion = "27.0.12077973" }' > android/app/build.gradle.kts
-        # This fixes the v1 embedding error
         echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:name="${applicationName}" android:label="fidel_listen_app" android:icon="@mipmap/ic_launcher"><activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize"><meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" /><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity><meta-data android:name="flutterEmbedding" android:value="2" /></application></manifest>' > android/app/src/main/AndroidManifest.xml
 
     # Step 5: Get all the app's dependencies
