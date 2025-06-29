@@ -1,0 +1,35 @@
+name: fidel_listen_final
+description: "Amharic OCR and Text-to-Speech App"
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  camera: ^0.10.5+9
+  image_picker: ^1.0.7
+  flutter_tesseract_ocr: ^0.4.24
+  flutter_tts: ^3.8.5
+
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.2
+
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.8
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/tessdata/
