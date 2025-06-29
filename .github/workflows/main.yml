@@ -15,46 +15,38 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Step 2: Set up Flutter
+    # Step 2: Get our app's source code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 3: Set up the Flutter SDK
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version: '3.19.0'
-
-    # Step 3: Get OUR app's source code into a temporary directory
-    - name: Checkout our app source
-      uses: actions/checkout@v4
-      with:
-        path: 'our_app_source'
-
-    # Step 4: Create a fresh, valid Flutter project in the main directory
-    - name: Create Valid Project
-      run: flutter create --project-name fidel_listen_app .
-
-    # Step 5: Copy our code into the valid project
-    - name: Prepare Project
+    
+    # Step 4: Manually create the Android build file to fix NDK and v1 embedding issues
+    - name: Create required Android build files
       run: |
-        # Delete the sample files from the valid project
-        rm -rf lib test
-        # Copy our files from the temporary directory, overwriting the defaults
-        cp -r our_app_source/lib .
-        cp -r our_app_source/assets .
-        cp our_app_source/pubspec.yaml .
+        mkdir -p android/app
+        # This fixes the NDK version error
+        echo 'android { ndkVersion = "27.0.12077973" }' > android/app/build.gradle.kts
+        # This fixes the v1 embedding error
+        echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:name="${applicationName}" android:label="fidel_listen_app" android:icon="@mipmap/ic_launcher"><activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize"><meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" /><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity><meta-data android:name="flutterEmbedding" android:value="2" /></application></manifest>' > android/app/src/main/AndroidManifest.xml
 
-    # Step 6: Get all the app's dependencies
+    # Step 5: Get all the app's dependencies
     - name: Get Flutter dependencies
       run: flutter pub get
 
-    # Step 7: Run the build_runner
+    # Step 6: Run the build_runner
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
-    
-    # Step 8: Build the actual .apk file
+
+    # Step 7: Build the actual .apk file
     - name: Build APK
       run: flutter build apk --release
       
-    # Step 9: Upload the finished .apk file
+    # Step 8: Upload the finished .apk file
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
