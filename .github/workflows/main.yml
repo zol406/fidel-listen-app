@@ -8,27 +8,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Set up the CORRECT Java environment (Java 17)
+    # Step 1: Set up Java 17
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '17'
 
-    # Step 2: Checkout the OFFICIAL Flutter starter project. This is guaranteed to be valid.
+    # Step 2: Set up a valid Flutter project foundation
     - name: Checkout a valid Flutter project
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        flutter-version: '3.19.0' # Using a specific stable version
-        
+        flutter-version: '3.19.0'
     - run: flutter create --template=app .
 
     # Step 3: Get OUR app's source code from our repository
     - name: Checkout our app source
       uses: actions/checkout@v4
       with:
-        path: 'our_app' # Put our code into a temporary folder
+        path: 'our_app'
 
     # Step 4: Prepare the project structure
     - name: Prepare project
@@ -39,10 +38,10 @@ jobs:
         cp our_app/app_source/pubspec.yaml .
         # Copy our entire lib folder
         cp -r our_app/app_source/lib .
-        # Copy our entire assets folder
+        # --- THIS WAS THE MISSING LINE ---
         cp -r our_app/assets .
 
-    # Step 5: Get all the app's dependencies based on our pubspec
+    # Step 5: Get all the app's dependencies
     - name: Get Flutter dependencies
       run: flutter pub get
 
@@ -50,13 +49,13 @@ jobs:
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
     
-    # Step 7: THIS IS THE NDK FIX. We create the file that Gradle needs.
+    # Step 7: Create the required NDK version file
     - name: Create required Android build file
       run: |
         mkdir -p android/app
         echo 'android { ndkVersion = "27.0.12077973" }' > android/app/build.gradle.kts
 
-    # Step 8: Build the actual .apk file
+    # Step 8: Build the APK
     - name: Build APK
       run: flutter build apk --release
       
