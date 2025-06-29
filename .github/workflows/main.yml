@@ -21,29 +21,25 @@ jobs:
       with:
         channel: 'stable'
 
-    # Step 3: Get all of our source code from the repository
+    # Step 3: Get all of our source code
     - name: Checkout source code
       uses: actions/checkout@v4
       
-    # Step 4: THE NEW DEBUGGING STEP! Show us all the files.
-    - name: List files for debugging
-      run: ls -R
-
-    # Step 5: Create a new, clean temporary directory for the build
+    # Step 4: Create a new, clean temporary directory for the build
     - name: Create temporary build directory
       run: mkdir ../build_dir
 
-    # Step 6: Create a blank, valid project in the temporary directory
+    # Step 5: Create a blank, valid project in the temporary directory
     - name: Create a new Flutter project
       run: |
         cd ../build_dir
         flutter create --project-name fidel_listen_final .
 
-    # Step 7: Copy our app's source code into the blank project
+    # Step 6: Copy our app's source code into the blank project
     - name: Copy app source into new project
       run: cp -r app_source/* ../build_dir/
 
-    # Step 8: Navigate into the new project and build
+    # Step 7: Navigate into the new project and build
     - name: Build the App
       run: |
         cd ../build_dir
@@ -51,7 +47,7 @@ jobs:
         flutter pub run build_runner build --delete-conflicting-outputs
         flutter build apk --release
         
-    # Step 9: Upload the finished .apk file from the build directory
+    # Step 8: Upload the finished .apk file from the build directory
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
