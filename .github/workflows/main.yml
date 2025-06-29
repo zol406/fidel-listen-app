@@ -19,27 +19,6 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-    name: Build Flutter Android App
-
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    # Step 1: Set up the CORRECT Java environment (Java 17)
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-
-    # Step 2: Set up the Flutter SDK
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-      with:
         channel: 'stable'
 
     # Step 3: Get all of our source code
@@ -74,37 +53,4 @@ jobs:
       with:
         name: fidel-listen-app-apk
         # THE FINAL FIX IS HERE: We now build the full path
-        path: ${{ github.workspace }}/../build_dir/build/app/outputs/flutter-apk/app-release.apk    channel: 'stable'
-
-    # Step 3: Get all of our source code
-    - name: Checkout source code
-      uses: actions/checkout@v4
-      
-    # Step 4: Create a new, clean temporary directory for the build
-    - name: Create temporary build directory
-      run: mkdir ../build_dir
-
-    # Step 5: Create a blank, valid project in the temporary directory
-    - name: Create a new Flutter project
-      run: |
-        cd ../build_dir
-        flutter create --project-name fidel_listen_final .
-
-    # Step 6: Copy our app's source code into the blank project
-    - name: Copy app source into new project
-      run: cp -r app_source/* ../build_dir/
-
-    # Step 7: Navigate into the new project and build
-    - name: Build the App
-      run: |
-        cd ../build_dir
-        flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs
-        flutter build apk --release
-        
-    # Step 8: Upload the finished .apk file from the build directory
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: fidel-listen-app-apk
-        path: ../build_dir/build/app/outputs/flutter-apk/app-release.apk
+        path: ${{ github.workspace }}/../build_dir/build/app/outputs/flutter-apk/app-release.apk
