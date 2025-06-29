@@ -15,44 +15,30 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Step 2: Set up a valid Flutter project foundation
-    - name: Checkout a valid Flutter project
+    # Step 2: Get our app's source code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 3: Set up the Flutter SDK
+    - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
         flutter-version: '3.19.0'
-    - run: flutter create --template=app .
-
-    # Step 3: Get OUR app's source code from our repository
-    - name: Checkout our app source
-      uses: actions/checkout@v4
-      with:
-        path: 'our_app'
-
-    # Step 4: Prepare the project structure
-    - name: Prepare project
-      run: |
-        rm -rf lib
-        rm -rf android
-        cp our_app/app_source/pubspec.yaml .
-        cp -r our_app/app_source/lib .
-        cp -r our_app/assets .
-        # THIS IS THE NEW, CRUCIAL LINE
-        cp -r our_app/app_source/android .
-
-    # Step 5: Get all the app's dependencies
+    
+    # Step 4: Get all the app's dependencies
     - name: Get Flutter dependencies
       run: flutter pub get
 
-    # Step 6: Run the build_runner
+    # Step 5: Run the build_runner
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
-    
-    # Step 7: Build the actual .apk file
+
+    # Step 6: Build the actual .apk file
     - name: Build APK
       run: flutter build apk --release
       
-    # Step 8: Upload the finished .apk file
+    # Step 7: Upload the finished .apk file
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
