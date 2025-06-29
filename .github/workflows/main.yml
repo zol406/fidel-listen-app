@@ -32,7 +32,9 @@ jobs:
     # Step 5: Run the build_runner to generate necessary files
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
-    
+    # Step 5.5: Automatically create missing Android/iOS files
+    - name: Create platform-specific files
+      run: flutter create .
     # Step 6: Build the actual .apk file
     - name: Build APK
       run: flutter build apk --release
