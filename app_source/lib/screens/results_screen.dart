@@ -26,8 +26,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
   late FlutterTts flutterTts;
   TtsState _ttsState = TtsState.stopped;
   double _speechRate = 0.5;
-  List<Map<String, String>> _amharicVoices = []; // Corrected Type
-  Map<String, String>? _currentVoice; // Corrected Type
+  List<Map<String, String>> _amharicVoices = [];
+  Map<String, String>? _currentVoice;
 
   @override
   void initState() {
@@ -57,7 +57,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
     try {
       var voices = await flutterTts.getVoices as List;
       if (mounted) {
-        // Correctly cast the voices to the required type
         _amharicVoices = voices
             .map((voice) => Map<String, String>.from(voice))
             .where((voice) => (voice['locale'] as String).contains('am'))
@@ -65,7 +64,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             
         if (_amharicVoices.isNotEmpty) {
           _currentVoice = _amharicVoices.first;
-          await flutterTts.setVoice(_currentVoice!); // THE FIRST FIX IS HERE
+          await flutterTts.setVoice(_currentVoice!);
         }
       }
     } catch (e) {
@@ -85,12 +84,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
   }
 
+  // --- THIS IS THE CORRECTED FUNCTION ---
   Future<void> _performOcr() async {
     final fakePath = '/data/user/0/com.example.fidel_listen_final/cache/placeholder.jpg';
     try {
+      // We pass the image path, and the new config file handles the language.
       String text = await FlutterTesseractOcr.extractText(
         widget.imagePath!,
-        language: 'amh',
       );
       
       final historyBox = Hive.box<ScanHistory>('scans');
@@ -115,6 +115,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       }
     }
   }
+  // --- END OF CORRECTED FUNCTION ---
 
   Future<void> _speak() async {
     if (_textController.text.isNotEmpty) {
@@ -267,7 +268,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   onTap: () {
                     setState(() {
                       _currentVoice = voice;
-                      flutterTts.setVoice(_currentVoice!); // THE SECOND FIX IS HERE
+                      flutterTts.setVoice(_currentVoice!);
                     });
                     Navigator.of(context).pop();
                   },
