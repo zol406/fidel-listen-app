@@ -15,30 +15,46 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Step 2: Get our app's source code
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    # Step 3: Set up the Flutter SDK
+    # Step 2: Set up Flutter
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
         flutter-version: '3.19.0'
-    
-    # Step 4: Get all the app's dependencies
+
+    # Step 3: Get OUR app's source code into a temporary directory
+    - name: Checkout our app source
+      uses: actions/checkout@v4
+      with:
+        path: 'our_app_source'
+
+    # Step 4: Create a fresh, valid Flutter project in the main directory
+    - name: Create Valid Project
+      run: flutter create --project-name fidel_listen_app .
+
+    # Step 5: Copy our code into the valid project
+    - name: Prepare Project
+      run: |
+        # Delete the sample files from the valid project
+        rm -rf lib test
+        # Copy our files from the temporary directory, overwriting the defaults
+        cp -r our_app_source/lib .
+        cp -r our_app_source/assets .
+        cp our_app_source/pubspec.yaml .
+
+    # Step 6: Get all the app's dependencies
     - name: Get Flutter dependencies
       run: flutter pub get
 
-    # Step 5: Run the build_runner
+    # Step 7: Run the build_runner
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
-
-    # Step 6: Build the actual .apk file
+    
+    # Step 8: Build the actual .apk file
     - name: Build APK
       run: flutter build apk --release
       
-    # Step 7: Upload the finished .apk file
+    # Step 9: Upload the finished .apk file
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
