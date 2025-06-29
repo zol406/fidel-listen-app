@@ -23,7 +23,7 @@ jobs:
         flutter-version: '3.19.0'
     - run: flutter create --template=app .
 
-    # Step 3: Get OUR app's source code from our repository
+    # Step 3: Get OUR app's source code
     - name: Checkout our app source
       uses: actions/checkout@v4
       with:
@@ -32,13 +32,9 @@ jobs:
     # Step 4: Prepare the project structure
     - name: Prepare project
       run: |
-        # Delete the sample lib directory from the valid project
         rm -rf lib
-        # Copy our pubspec.yaml file, overwriting the default one
         cp our_app/app_source/pubspec.yaml .
-        # Copy our entire lib folder
         cp -r our_app/app_source/lib .
-        # --- THIS WAS THE MISSING LINE ---
         cp -r our_app/assets .
 
     # Step 5: Get all the app's dependencies
@@ -54,6 +50,11 @@ jobs:
       run: |
         mkdir -p android/app
         echo 'android { ndkVersion = "27.0.12077973" }' > android/app/build.gradle.kts
+
+    # --- THIS IS THE DEBUGGING STEP ---
+    # Step 7.5: List all files right before the build
+    - name: List final file structure
+      run: ls -R
 
     # Step 8: Build the APK
     - name: Build APK
