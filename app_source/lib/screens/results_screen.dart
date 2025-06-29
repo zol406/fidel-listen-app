@@ -26,8 +26,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
   late FlutterTts flutterTts;
   TtsState _ttsState = TtsState.stopped;
   double _speechRate = 0.5;
-  List<Map> _amharicVoices = [];
-  Map? _currentVoice;
+  List<Map<String, String>> _amharicVoices = []; // Corrected Type
+  Map<String, String>? _currentVoice; // Corrected Type
 
   @override
   void initState() {
@@ -55,12 +55,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
     flutterTts.setErrorHandler((msg) => setState(() => _ttsState = TtsState.stopped));
 
     try {
-      var voices = await flutterTts.getVoices;
+      var voices = await flutterTts.getVoices as List;
       if (mounted) {
-        _amharicVoices = voices.where((voice) => (voice['locale'] as String).contains('am')).toList();
+        // Correctly cast the voices to the required type
+        _amharicVoices = voices
+            .map((voice) => Map<String, String>.from(voice))
+            .where((voice) => (voice['locale'] as String).contains('am'))
+            .toList();
+            
         if (_amharicVoices.isNotEmpty) {
           _currentVoice = _amharicVoices.first;
-          await flutterTts.setVoice(_currentVoice!);
+          await flutterTts.setVoice(_currentVoice!); // THE FIRST FIX IS HERE
         }
       }
     } catch (e) {
@@ -258,11 +263,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
               itemBuilder: (context, index) {
                 final voice = _amharicVoices[index];
                 return ListTile(
-                  title: Text(voice['name']),
+                  title: Text(voice['name'] ?? 'Unknown Voice'),
                   onTap: () {
                     setState(() {
                       _currentVoice = voice;
-                      flutterTts.setVoice(_currentVoice!);
+                      flutterTts.setVoice(_currentVoice!); // THE SECOND FIX IS HERE
                     });
                     Navigator.of(context).pop();
                   },
