@@ -32,4 +32,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    # This section tells Flutter which files to bundle with the app.
+    # It needs to know about BOTH the folder and the config file.
     - assets/tessdata/
+    - assets/tessdata_config.json
