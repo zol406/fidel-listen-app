@@ -21,36 +21,38 @@ jobs:
       with:
         channel: 'stable'
 
-    # Step 3: Get all of our source code
+    # Step 3: Get our source code from the repository
     - name: Checkout source code
       uses: actions/checkout@v4
-      
-    # Step 4: Create a new, clean temporary directory for the build
-    - name: Create temporary build directory
-      run: mkdir ../build_dir
 
-    # Step 5: Create a blank, valid project in the temporary directory
-    - name: Create a new Flutter project
+    # Step 4: THE NEW, SIMPLIFIED FIX
+    # We will now create a valid project and move our code into it, all in one place.
+    - name: Prepare Project For Build
       run: |
-        cd ../build_dir
+        # Create a temporary folder for our source
+        mkdir temp_source
+        # Move our app's source code into the temporary folder
+        mv app_source/* temp_source/
+        # Create a fresh, valid project in the current directory
         flutter create --project-name fidel_listen_final .
+        # Copy our source code from the temp folder into the fresh project
+        cp -r temp_source/* .
 
-    # Step 6: Copy our app's source code into the blank project
-    - name: Copy app source into new project
-      run: cp -r app_source/* ../build_dir/
+    # Step 5: Get all the app's dependencies
+    - name: Get Flutter dependencies
+      run: flutter pub get
 
-    # Step 7: Navigate into the new project and build
-    - name: Build the App
-      run: |
-        cd ../build_dir
-        flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs
-        flutter build apk --release
-        
-    # Step 8: Upload the finished .apk file from the build directory
+    # Step 6: Run the build_runner
+    - name: Run build_runner
+      run: flutter pub run build_runner build --delete-conflicting-outputs
+
+    # Step 7: Build the actual .apk file
+    - name: Build APK
+      run: flutter build apk --release
+      
+    # Step 8: Upload the finished .apk file. The path is now simple.
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: fidel-listen-app-apk
-        # THE FINAL FIX IS HERE: We now build the full path
-        path: ${{ github.workspace }}/../build_dir/build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
