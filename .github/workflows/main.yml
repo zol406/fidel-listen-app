@@ -15,42 +15,52 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Step 2: Set up the Flutter SDK
-    - name: Set up Flutter
+    # Step 2: Checkout the OFFICIAL Flutter starter project. This is guaranteed to be valid.
+    - name: Checkout a valid Flutter project
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+        flutter-version: '3.19.0' # Using a specific stable version
+        
+    - run: flutter create --template=app .
 
-    # Step 3: Get our source code from the repository
-    - name: Checkout source code
+    # Step 3: Get OUR app's source code from our repository
+    - name: Checkout our app source
       uses: actions/checkout@v4
+      with:
+        path: 'our_app' # Put our code into a temporary folder
 
-    # Step 4: THE NEW, SIMPLIFIED FIX
-    # We will now create a valid project and move our code into it, all in one place.
-    - name: Prepare Project For Build
+    # Step 4: Prepare the project structure
+    - name: Prepare project
       run: |
-        # Create a temporary folder for our source
-        mkdir temp_source
-        # Move our app's source code into the temporary folder
-        mv app_source/* temp_source/
-        # Create a fresh, valid project in the current directory
-        flutter create --project-name fidel_listen_final .
-        # Copy our source code from the temp folder into the fresh project
-        cp -r temp_source/* .
+        # Delete the sample lib directory from the valid project
+        rm -rf lib
+        # Copy our pubspec.yaml file, overwriting the default one
+        cp our_app/app_source/pubspec.yaml .
+        # Copy our entire lib folder
+        cp -r our_app/app_source/lib .
+        # Copy our entire assets folder
+        cp -r our_app/assets .
 
-    # Step 5: Get all the app's dependencies
+    # Step 5: Get all the app's dependencies based on our pubspec
     - name: Get Flutter dependencies
       run: flutter pub get
 
     # Step 6: Run the build_runner
     - name: Run build_runner
       run: flutter pub run build_runner build --delete-conflicting-outputs
+    
+    # Step 7: THIS IS THE NDK FIX. We create the file that Gradle needs.
+    - name: Create required Android build file
+      run: |
+        mkdir -p android/app
+        echo 'android { ndkVersion = "27.0.12077973" }' > android/app/build.gradle.kts
 
-    # Step 7: Build the actual .apk file
+    # Step 8: Build the actual .apk file
     - name: Build APK
       run: flutter build apk --release
       
-    # Step 8: Upload the finished .apk file. The path is now simple.
+    # Step 9: Upload the finished .apk file
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
